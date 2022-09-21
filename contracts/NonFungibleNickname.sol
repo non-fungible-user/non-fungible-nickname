@@ -98,6 +98,11 @@ contract NonFungibleNickname is ERC721Burnable, Pausable, Ownable {
         emit Mint(msg.sender, tokenId);
     }
 
+    function withdraw() external onlyOwner {
+        (bool success, ) = owner().call{value: address(this).balance}("");
+        require(success);
+    }
+
     function _beforeTokenTransfer(
         address from,
         address to,

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, waffle } from "hardhat";
 
 describe("Non Fungible Nickname", function () {
   it("Should mint new name as owner", async function () {
@@ -176,5 +176,26 @@ describe("Non Fungible Nickname", function () {
     expect(await contract.tokenURI(tokenId)).is.eq(baseURI + tokenId);
 
     // expect(await contract.balanceOf(owner.address)).is.eq(1);
+  });
+
+  it("Should payed mint new name", async function () {
+    const cost = ethers.utils.parseEther("0.02");
+    const [owner, addr1, addr2] = await ethers.getSigners();
+    const Contract = await ethers.getContractFactory("NonFungibleNickname");
+    const contract = await Contract.deploy();
+    await contract.deployed();
+
+    const provider = waffle.provider;
+    const ownerOldBalance = await provider.getBalance(owner.address);
+
+    await contract
+      .connect(addr1)
+      .safeMint("non_fungible_user", { value: cost });
+
+    await contract.withdraw();
+
+    const ownerNewBalance = await provider.getBalance(owner.address);
+
+    expect(ownerNewBalance).is.gt(ownerOldBalance);
   });
 });
