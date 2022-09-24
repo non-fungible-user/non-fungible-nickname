@@ -12,7 +12,7 @@ contract NonFungibleNickname is ERC721Burnable, Pausable, Ownable {
 
     string private _baseUri;
 
-    mapping(uint256 => string) nicknames;
+    mapping(uint256 => string) public nicknames;
     mapping(uint256 => bool) private _fireProtection;
 
     event Mint(address indexed to, uint256 indexed tokenId);
@@ -57,7 +57,9 @@ contract NonFungibleNickname is ERC721Burnable, Pausable, Ownable {
             !_fireProtection[tokenId],
             "Non Fungible Nickname: this token protected"
         );
+
         _burn(tokenId);
+        delete nicknames[tokenId];
     }
 
     function burnByVoted(uint256 tokenId) public virtual onlyOwner {
@@ -65,7 +67,9 @@ contract NonFungibleNickname is ERC721Burnable, Pausable, Ownable {
             !_fireProtection[tokenId],
             "Non Fungible Nickname: this token protected"
         );
+
         _burn(tokenId);
+        delete nicknames[tokenId];
     }
 
     function protectFromFire(uint256 tokenId) public onlyOwner {
@@ -94,6 +98,8 @@ contract NonFungibleNickname is ERC721Burnable, Pausable, Ownable {
 
         uint256 tokenId = generateRandomId(name);
         _safeMint(msg.sender, tokenId);
+
+        nicknames[tokenId] = name;
 
         emit Mint(msg.sender, tokenId);
     }
